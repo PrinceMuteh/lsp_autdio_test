@@ -16,11 +16,25 @@ export default function AudioCapture() {
   useEffect(() => {
     const getAudioDevices = async () => {
       try {
-        const deviceInfos = await navigator.mediaDevices.enumerateDevices();
-        const audioDevices = deviceInfos.filter(
-          (device) => device.kind === "audioinput"
-        );
-        setDevices(audioDevices);
+        // Check for microphone permissions
+        const permission = await navigator.permissions.query({
+          name: "microphone",
+        });
+
+        if (permission.state === "granted") {
+          // Get audio devices if permission is granted
+          const deviceInfos = await navigator.mediaDevices.enumerateDevices();
+          const audioDevices = deviceInfos.filter(
+            (device) => device.kind === "audioinput"
+          );
+          setDevices(audioDevices);
+        } else if (
+          permission.state === "prompt" ||
+          permission.state === "denied"
+        ) {
+          // Handle the case where permission is denied or needs to be requested
+          console.error("Microphone permission is required.");
+        }
       } catch (error) {
         console.error("Error accessing media devices:", error);
       }
@@ -28,6 +42,16 @@ export default function AudioCapture() {
 
     getAudioDevices();
   }, []);
+
+  const requestPermission = async () => {
+    try {
+      // Request microphone permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop()); // Stop tracks after requesting permission
+    } catch (error) {
+      console.error("Microphone permission denied:", error);
+    }
+  };
 
   const startRecording = async (deviceId, index) => {
     try {
@@ -116,8 +140,7 @@ export default function AudioCapture() {
     setUploading(true);
     setUploadStatus("");
 
-    const token =
-      "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3OTEyNTYsImlhdCI6MTcyNzcwNDg1Niwic3ViIjozfQ.OWlNluWMhpQURSd9S0Zp-km-t3g3UqcLAnxVNjsoi7Xu7v0_89hhySo9jFUkHqbzljM3XqsCfdUjCk6h0cXaMYWtheY-Ojlb1Qlj-arOo2AoIKIJ8_XvvgnPhWHKLkbvPQWe3nxUMmJS7GfRtN_0bPBJ2G9Z4HMKFxbNnIeEL6oflfH5ILdigmcmCuabB-Bfqd9GbkszofTlEih9KnM0VxQA12hvZVo7LWYp6JlYgu7Yqd2jEWuJ93IjHtV5D-KTigySxbx0qAdAESkt4UpwBRWLvArYbS-Vh5aSUnDwAf-7C0aqTMmEPm7nxg43_m67RvTP1GOwibLcWUiwTmUxhSL1LvVsDqOepJWJcyMTsO_0s--14XM1y4LsVo5RI_gy8qvuLj3wwUy5FXIgFg8XwjdrtiyF5_J7Bu_lAhfPnSjd8OdXisGZRwEONwNq6exIP8HkqvtEpADYUAi8s8T9TBkW7by5Gekrm4g5UqWkeSXG5zMTGZpuN5MoD9u5dRxzcF3Ut-6AqNkPUn2m4Wyl0Mmv8zt5L8v3bxjnbdS768ybGaO1i8PVHXCl-fcwltbzr0WpiD_Blg6HpCq9nSsCHdiX_D013-lwHOIG_i-MVl3YmPl3ExtWnUzhO1L2glSUTf86xwTeoEGYxqfk-wPk02-pBNE49TeanJXyMUvON10"; // Use your token
+    const token = "your-token"; // Replace with your token
     try {
       for (let i = 0; i < blobs.length; i++) {
         if (!blobs[i]) continue; // Skip if no blob for this index
@@ -152,6 +175,14 @@ export default function AudioCapture() {
       <h2 className="text-2xl font-semibold text-gray-800 mb-8">
         Audio Capture and Upload
       </h2>
+
+      {/* Request permission button */}
+      <button
+        className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition mb-6"
+        onClick={requestPermission}
+      >
+        Request Microphone Permission
+      </button>
 
       {/* URL input field */}
       <div className="w-full max-w-lg mb-4">
@@ -255,10 +286,6 @@ export default function AudioCapture() {
           </div>
         ))}
       </div>
-
-      {uploadStatus && (
-        <p className="mt-4 text-sm text-gray-600">{uploadStatus}</p>
-      )}
     </div>
   );
 }

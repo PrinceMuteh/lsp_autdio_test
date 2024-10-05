@@ -109,16 +109,20 @@ export default function AudioCapture() {
 
   const uploadAudio = async (blob, index) => {
     setUploading(true);
-
     setUploadStatus(""); // Reset the status before uploading
+
     try {
       const formData = new FormData();
-      formData.append("file", blob, `audio-${index}.webm`);
+      formData.append("files", blob, `audio-${index}.webm`);
+      formData.append("case_id", "4");
 
-      const response = await fetch("https://134.209.94.159:3500/public-upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://api.devon.helixfons.com/public-upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upload");

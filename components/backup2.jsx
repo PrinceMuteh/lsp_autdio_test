@@ -115,7 +115,7 @@ export default function AudioCapture() {
       const formData = new FormData();
       formData.append("file", blob, `audio-${index}.webm`);
 
-      const response = await fetch("http://134.209.94.159:3500/public-upload", {
+      const response = await fetch("https://134.209.94.159:3500/public-upload", {
         method: "POST",
         body: formData,
       });

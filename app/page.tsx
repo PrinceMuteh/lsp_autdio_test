@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
-import AudioCapture from "../components/AudioCapture";
-// import AudioWave from "../components/WaveCapture";
+// import AudioCapture from "../components/AudioCapture";
+import BAckup from "../components/backup2";
 // import type { Metadata } from "next";
 
 // export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default function Home() {
       <meta name="description" content="Capture audio from input device" />
       {/* </Head> */}
       <main>
-        <AudioCapture />
+        <BAckup />
         {/* <AudioWave /> */}
       </main>
     </div>

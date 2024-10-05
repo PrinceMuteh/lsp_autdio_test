@@ -12,7 +12,6 @@ export default function AudioCapture() {
   const [isPaused, setIsPaused] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(""); // Track upload status messages
-  const [uploadUrl, setUploadUrl] = useState(""); // Add a state to hold the upload URL
 
   useEffect(() => {
     const getAudioDevices = async () => {
@@ -110,11 +109,6 @@ export default function AudioCapture() {
   };
 
   const uploadAudio = async (blob, index) => {
-    if (!uploadUrl) {
-      setUploadStatus("Please provide a valid upload URL.");
-      return;
-    }
-
     setUploading(true);
     setUploadStatus(""); // Reset the status before uploading
 
@@ -128,11 +122,15 @@ export default function AudioCapture() {
         console.log(`${pair[0]}: ${pair[1]}`);
       }
 
-      const response = await axios.post(uploadUrl, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "https://134.209.94.159:3500/public-upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.status !== 200) {
         throw new Error("Failed to upload");
@@ -146,24 +144,45 @@ export default function AudioCapture() {
       setUploading(false);
     }
   };
+  //   const uploadAudio = async (blob, index) => {
+  //     setUploading(true);
+  //     setUploadStatus(""); // Reset the status before uploading
+
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append("files", blob, `audio-${index}.webm`);
+  //       formData.append("case_id", "4");
+
+  //       // Log the FormData contents
+  //       for (const pair of formData.entries()) {
+  //         console.log(`${pair[0]}: ${pair[1]}`);
+  //       }
+  //       const response = await fetch(
+  //         "https://api.devon.helixfons.com/public-upload",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+
+  //       if (!response.ok) {
+  //         throw new Error("Failed to upload");
+  //       }
+
+  //       setUploadStatus("Upload successful!");
+  //     } catch (error) {
+  //       console.error("Upload failed:", error);
+  //       setUploadStatus("Failed to upload the audio");
+  //     } finally {
+  //       setUploading(false);
+  //     }
+  //   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
       <h2 className="text-2xl font-semibold text-gray-800 mb-8">
         Select Audio Input Sources
       </h2>
-
-      {/* Input for URL */}
-      <div className="w-full max-w-lg mb-6">
-        <input
-          type="text"
-          placeholder="Enter Upload URL"
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={uploadUrl}
-          onChange={(e) => setUploadUrl(e.target.value)}
-        />
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[0, 1, 2, 3].map((index) => (
           <div
